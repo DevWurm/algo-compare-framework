@@ -1,7 +1,4 @@
 #include "../headers/compare_base.h"
-#include <string>
-
-using std::string;
 
 namespace compare {
 
