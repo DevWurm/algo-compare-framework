@@ -11,48 +11,44 @@ using std::ostream;
 namespace compare {
 
 template<typename T>
-void compare_base<T>::start_algorithm_1() {
+void compare_base<T>::start_algorithm_1(compare_base& object, T& data, T& result) {
 	std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
-	thread thread_algorithm_1 (algorithm_1<T>, ref(data), ref(result_algorithm_1)); //start thread of algorithm 1
-	thread_algorithm_1.join();
+	object.algorithm_1(data, result); //start algorithm 1
 	std::chrono::steady_clock::time_point stop = std::chrono::steady_clock::now();
 	operation_time_algorithm_1 = stop - start;
 }
 
 template<typename T>
-void compare_base<T>::start_algorithm_2() {
+void compare_base<T>::start_algorithm_2(compare_base& object, T& data, T& result) {
 	std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
-	thread thread_algorithm_2 (algorithm_2<T>, ref(data), ref(result_algorithm_1)); //start thread of algorithm 1
-	thread_algorithm_2.join();
+	object.algorithm_2(data,result); //start algorithm 2
 	std::chrono::steady_clock::time_point stop = std::chrono::steady_clock::now();
 	operation_time_algorithm_2 = stop - start;
 }
 
 template<typename T>
 void compare_base<T>::compare_algorithms() {
-	thread thread_start_algorithm_1(start_algorithm_1<T>);
-	thread thread_start_algorithm_2(start_algorithm_2<T>);
+	thread thread_start_algorithm_1(&compare_base<T>::start_algorithm_1, this, ref(*this), ref(data), ref(result_algorithm_1));
+	thread thread_start_algorithm_2(&compare_base<T>::start_algorithm_2, this, ref(*this), ref(data), ref(result_algorithm_2));
 	thread_start_algorithm_1.join();
 	thread_start_algorithm_2.join();
 }
 
 template<typename T>
-void compare_base<T>::start_algorithm_1_verbose(ostream& output) {
-	std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
-	thread thread_algorithm_1 (algorithm_1<T>, ref(data), ref(result_algorithm_1)); //start thread of algorithm 1
+void compare_base<T>::start_algorithm_1_verbose(compare_base& object, T& data, T& result, ostream& output) {
 	output << "Algorithm 1 started\n";
-	thread_algorithm_1.join();
+	std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
+	object.algorithm_1(data, result); //start algorithm 1
 	std::chrono::steady_clock::time_point stop = std::chrono::steady_clock::now();
 	output << "Algorithm 1 ended\n";
 	operation_time_algorithm_1 = stop - start;
 }
 
 template<typename T>
-void compare_base<T>::start_algorithm_2_verbose(ostream& output) {
-	std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
-	thread thread_algorithm_2 (algorithm_2<T>, ref(data), ref(result_algorithm_1)); //start thread of algorithm 1
+void compare_base<T>::start_algorithm_2_verbose(compare_base& object, T& data, T& result, ostream& output) {
 	output << "Algorithm 2 started\n";
-	thread_algorithm_2.join();
+	std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
+	object.algorithm_2(data, result); //start thread of algorithm 1
 	std::chrono::steady_clock::time_point stop = std::chrono::steady_clock::now();
 	output << "Algorithm 2 ended\n";
 	operation_time_algorithm_2 = stop - start;
@@ -60,8 +56,8 @@ void compare_base<T>::start_algorithm_2_verbose(ostream& output) {
 
 template<typename T>
 void compare_base<T>::compare_algorithms_verbose(ostream& output) {
-	thread thread_start_algorithm_1(start_algorithm_1_verbose<T>, ref(output));
-	thread thread_start_algorithm_2(start_algorithm_2_verbose<T>, ref(output));
+	thread thread_start_algorithm_1(&compare_base<T>::start_algorithm_1_verbose, this, ref(*this), ref(data), ref(result_algorithm_1), ref(output));
+	thread thread_start_algorithm_2(&compare_base<T>::start_algorithm_2_verbose, this, ref(*this), ref(data), ref(result_algorithm_2), ref(output));
 	thread_start_algorithm_1.join();
 	thread_start_algorithm_2.join();
 	output << "Duration of Algorithm 1: " << get_operation_time_algorithm_1_string() << "ms\n";
